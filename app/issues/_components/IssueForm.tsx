@@ -44,7 +44,7 @@ const IssueForm = ({ issue }: Props) => {
       setSubmitting(true);
       if (issue)
         // for update
-        await axios.patch(`"/api/issue/${issue.id}"`, data);
+        await axios.patch("/api/issues/" + issue.id, data);
       // for create
       else await axios.post("/api/issues", data);
 

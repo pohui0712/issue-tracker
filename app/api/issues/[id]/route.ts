@@ -1,7 +1,5 @@
-import { issueSchema } from "@/app/validationSchemas";
 import prisma from "@/prisma/client";
 import { NextRequest, NextResponse } from "next/server";
-import { describe } from "node:test";
 
 export async function PATCH(
   request: NextRequest,
@@ -10,11 +8,14 @@ export async function PATCH(
   // validation the body of request
   const body = await request.json();
 
-  // vadiation with shemca
-  const validation = issueSchema.safeParse(body);
+  /** 
+    ----> Not need to apply as 'IssueForm' is alraady use 'schema' to validate
+    // // vadiation with shemca
+    // const validation = issueSchema.safeParse(body);
 
-  if (!validation.success)
-    return NextResponse.json(validation.error.format(), { status: 400 });
+    // if (!validation.success)
+    //   return NextResponse.json(validation.error.format(), { status: 400 });
+  **/
 
   // Update with specific id
   const updateIssue = await prisma.issue.update({
@@ -24,6 +25,7 @@ export async function PATCH(
     data: {
       title: body.title,
       description: body.description,
+      status: body.status,
     },
   });
 
