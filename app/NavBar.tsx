@@ -13,7 +13,7 @@ const NavBar = () => {
   // Define the navigation in an array and map it to a brunch of list items
   const links = [
     { label: "Dashboard", href: "/" },
-    { label: "Issues", href: "/issues" },
+    { label: "Issues", href: "/issues/list" },
   ];
 
   return (
