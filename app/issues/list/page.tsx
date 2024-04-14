@@ -29,8 +29,16 @@ const IssuesPage = async ({ searchParams }: Props) => {
     ? searchParams.status
     : undefined;
 
+  // Validate the orderBy before passing to prisma
+  const orderBy = columns
+    .map((column) => column.value)
+    .includes(searchParams.orderBy) // .includes() only pass with array of string
+    ? { [searchParams.orderBy]: "asc" } // add [] to compute the property name dynamically at run time
+    : undefined; // Prisma not include the undefine
+
   const issues = await prisma.issue.findMany({
     where: { status },
+    orderBy,
   });
 
   return (
