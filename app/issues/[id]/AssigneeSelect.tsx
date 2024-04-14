@@ -9,31 +9,24 @@ import toast, { Toaster } from "react-hot-toast";
 
 const AssigneeSelect = ({ issue }: { issue: Issue }) => {
   // with React Query, no longer to use state and effect hooks
-  const {
-    data: users,
-    error,
-    isLoading,
-  } = useQuery<User[]>({
-    queryKey: ["Users"], // used fot uniquely identifying a piece of data in the cache
-    queryFn: () => axios.get("/api/users").then((res) => res.data), // function used to fetching data
-    staleTime: 60 * 1000, //60s
-    retry: 3, /// React query automatically retry up to 3 times to fetch data
-  });
+  const { data: users, error, isLoading } = useUsers();
 
   if (isLoading) return <Skeleton />;
   if (error) return null;
+
+  const assignIssue = (userId: string) => {
+    axios
+      .patch("/api/issues/" + issue.id, {
+        assignedToUserId: userId || null,
+      })
+      .catch(() => toast.error("Changes could not be saved"));
+  };
 
   return (
     <>
       <Select.Root
         defaultValue={issue.assignedToUserId || ""}
-        onValueChange={(userId) => {
-          axios
-            .patch("/api/issues/" + issue.id, {
-              assignedToUserId: userId || null,
-            })
-            .catch(() => toast.error("Changes could not be saved"));
-        }}
+        onValueChange={assignIssue}
       >
         <Select.Trigger placeholder="Assign..." />
         <Select.Content>
@@ -52,5 +45,13 @@ const AssigneeSelect = ({ issue }: { issue: Issue }) => {
     </>
   );
 };
+
+const useUsers = () =>
+  useQuery<User[]>({
+    queryKey: ["Users"], // used fot uniquely identifying a piece of data in the cache
+    queryFn: () => axios.get("/api/users").then((res) => res.data), // function used to fetching data
+    staleTime: 60 * 1000, //60s
+    retry: 3, /// React query automatically retry up to 3 times to fetch data
+  });
 
 export default AssigneeSelect;
