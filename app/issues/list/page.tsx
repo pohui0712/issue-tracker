@@ -1,16 +1,29 @@
 import authOptions from "@/app/auth/authOptions";
 import { IssueStatusBadge, Link } from "@/app/components";
 import prisma from "@/prisma/client";
+import { Status } from "@prisma/client";
 import { Table } from "@radix-ui/themes";
 import { getServerSession } from "next-auth";
 import EditStatus from "../_components/EditStatus";
 import IssueActions from "./IssueActions";
 
-const IssuesPage = async () => {
+interface Props {
+  searchParams: { status: Status };
+}
+const IssuesPage = async ({ searchParams }: Props) => {
   // to get the current user session
   const session = await getServerSession(authOptions);
 
-  const issues = await prisma.issue.findMany();
+  // Validate the status before passing to prisma
+  const statuses = Object.values(Status);
+
+  const status = statuses.includes(searchParams.status)
+    ? searchParams.status
+    : undefined;
+
+  const issues = await prisma.issue.findMany({
+    where: { status },
+  });
 
   return (
     <div>
