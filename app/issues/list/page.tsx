@@ -1,16 +1,24 @@
 import authOptions from "@/app/auth/authOptions";
 import { IssueStatusBadge, Link } from "@/app/components";
+import NextLink from "next/link";
 import prisma from "@/prisma/client";
-import { Status } from "@prisma/client";
+import { Issue, Status } from "@prisma/client";
 import { Table } from "@radix-ui/themes";
 import { getServerSession } from "next-auth";
 import EditStatus from "../_components/EditStatus";
 import IssueActions from "./IssueActions";
+import { ArrowUpIcon } from "@radix-ui/react-icons";
 
 interface Props {
-  searchParams: { status: Status };
+  searchParams: { status: Status; orderBy: keyof Issue };
 }
 const IssuesPage = async ({ searchParams }: Props) => {
+  const columns: { label: string; value: keyof Issue; className?: string }[] = [
+    { label: "Issue", value: "title" },
+    { label: "Status", value: "status", className: "hidden md:table-cell" },
+    { label: "Created", value: "createdAt", className: "hidden md:table-cell" },
+  ];
+
   // to get the current user session
   const session = await getServerSession(authOptions);
 
@@ -30,15 +38,19 @@ const IssuesPage = async ({ searchParams }: Props) => {
       <IssueActions />
       <Table.Root variant="surface">
         <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeaderCell>Issue</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="hidden md:table-cell">
-              Status
+          {columns.map((column) => (
+            <Table.ColumnHeaderCell key={column.value}>
+              <NextLink
+                href={{ query: { ...searchParams, orderBy: column.value } }}
+              >
+                {column.label}
+              </NextLink>
+              {column.value === searchParams.orderBy && (
+                <ArrowUpIcon className="inline" />
+              )}
             </Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="hidden md:table-cell">
-              Created
-            </Table.ColumnHeaderCell>
-          </Table.Row>
+          ))}
+          <Table.Row></Table.Row>
         </Table.Header>
         <Table.Body>
           {issues.map((issue) => (
