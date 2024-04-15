@@ -7,21 +7,23 @@ import EditIssueButton from "./EditIssueButton";
 import IssueDetails from "./IssueDetails";
 import authOptions from "@/app/auth/authOptions";
 import AssigneeSelect from "./AssigneeSelect";
+import { cache } from "react";
 
 interface Props {
   params: { id: string };
 }
+
+// React chache
+const fetchUser = cache((issueId: number) =>
+  prisma.issue.findUnique({ where: { id: issueId } })
+);
 
 const IssueDetailPage = async ({ params }: Props) => {
   // to get the current user session
   const session = await getServerSession(authOptions);
 
   // Fetch the issue details with id
-  const issue = await prisma.issue.findUnique({
-    where: {
-      id: parseInt(params.id),
-    },
-  });
+  const issue = await fetchUser(parseInt(params.id));
 
   // Validate the id
   if (!issue) notFound();
@@ -46,9 +48,7 @@ const IssueDetailPage = async ({ params }: Props) => {
 
 // Dynamic meatadata based on the title of the issue
 export async function generateMetadata({ params }: Props) {
-  const issue = await prisma.issue.findUnique({
-    where: { id: parseInt(params.id) },
-  });
+  const issue = await await fetchUser(parseInt(params.id));
 
   return {
     title: issue?.title,
