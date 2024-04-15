@@ -8,9 +8,14 @@ import { getServerSession } from "next-auth";
 import EditStatus from "../_components/EditStatus";
 import IssueActions from "./IssueActions";
 import { ArrowUpIcon } from "@radix-ui/react-icons";
+import Pagination from "@/app/components/Pagination";
 
 interface Props {
-  searchParams: { status: Status; orderBy: keyof Issue };
+  searchParams: {
+    status: Status;
+    orderBy: keyof Issue; // use "keyof" operator to get the union of all properties which are strings
+    page: string;
+  };
 }
 const IssuesPage = async ({ searchParams }: Props) => {
   const columns: { label: string; value: keyof Issue; className?: string }[] = [
@@ -36,10 +41,17 @@ const IssuesPage = async ({ searchParams }: Props) => {
     ? { [searchParams.orderBy]: "asc" } // add [] to compute the property name dynamically at run time
     : undefined; // Prisma not include the undefine
 
+  const page = parseInt(searchParams.page) || 1; // default value of 1
+  const pageSize = 10;
+
   const issues = await prisma.issue.findMany({
     where: { status },
     orderBy,
+    skip: (page - 1) * pageSize, // the number of record should be skipped
+    take: pageSize,
   });
+
+  const issueCount = await prisma.issue.count({ where: { status } });
 
   return (
     <div>
@@ -91,6 +103,11 @@ const IssuesPage = async ({ searchParams }: Props) => {
           ))}
         </Table.Body>
       </Table.Root>
+      <Pagination
+        pageSize={pageSize}
+        currentPage={page}
+        itemCount={issueCount}
+      />
     </div>
   );
 };
