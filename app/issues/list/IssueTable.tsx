@@ -1,10 +1,11 @@
 import authOptions from "@/app/auth/authOptions";
-import { IssueStatusBadge } from "@/app/components";
+import { IssueStatusBadge, Link } from "@/app/components";
 import { Issue, Status } from "@prisma/client";
 import { ArrowUpIcon } from "@radix-ui/react-icons";
 import { Table } from "@radix-ui/themes";
 import { getServerSession } from "next-auth";
-import { default as Link, default as NextLink } from "next/link";
+import { default as NextLink } from "next/link";
+
 import EditStatus from "../_components/EditStatus";
 
 export interface IssueQuery {
